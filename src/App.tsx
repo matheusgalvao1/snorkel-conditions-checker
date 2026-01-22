@@ -7,7 +7,6 @@ import { fetchConditions } from "./services/openMeteo";
 import { buildRatingSummary, ratingColors } from "./utils/rating";
 
 const emptySuggestions: SpotSuggestion[] = [];
-const defaultLocationQuery = "Governador Celso Ramos, Brazil";
 
 type RequestState =
   | { status: "idle" }
@@ -40,7 +39,7 @@ function formatWindDirection(degrees: number | null): string {
 }
 
 export default function App() {
-  const [query, setQuery] = useState(defaultLocationQuery);
+  const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<LocationOption | null>(null);
   const [options, setOptions] = useState<LocationOption[]>([]);
   const [suggestions, setSuggestions] = useState<SpotSuggestion[]>([]);
@@ -67,50 +66,6 @@ export default function App() {
     };
   }, [query]);
 
-  useEffect(() => {
-    if (state.status !== "idle") {
-      return;
-    }
-
-    if (!navigator.geolocation) {
-      void runSearch(defaultLocationQuery);
-      return;
-    }
-
-    setState({ status: "loading", message: "Getting your location..." });
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-
-        try {
-          const reverseGeoQuery = `${longitude},${latitude}`;
-          const { options: locations } = await geocodeLocation(reverseGeoQuery, 1);
-
-          if (locations.length === 0) {
-            void runSearch(defaultLocationQuery);
-            return;
-          }
-
-          const currentLocation = locations[0];
-          setQuery(currentLocation.placeName);
-          setSelected(currentLocation);
-
-          await fetchAndScore(currentLocation, locations);
-        } catch (error) {
-          void runSearch(defaultLocationQuery);
-        }
-      },
-      () => {
-        void runSearch(defaultLocationQuery);
-      },
-      {
-        enableHighAccuracy: false,
-        timeout: 5000,
-        maximumAge: 300000,
-      }
-    );
-  }, [state.status]);
 
   const rating = useMemo(() => {
     if (state.status !== "success") {
