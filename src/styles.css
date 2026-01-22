@@ -245,9 +245,11 @@ p {
   background: var(--surface);
   border-radius: 16px;
   padding: 20px;
+  padding-bottom: 36px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  position: relative;
 }
 
 .meter-header {
@@ -279,19 +281,6 @@ p {
   margin-left: 2px;
 }
 
-.meter-track {
-  height: 8px;
-  background: rgba(0, 0, 0, 0.06);
-  border-radius: 99px;
-  overflow: hidden;
-}
-
-.meter-fill {
-  height: 100%;
-  border-radius: 99px;
-  transition: width 0.4s ease;
-}
-
 .meter-footer {
   display: flex;
   align-items: flex-start;
@@ -313,6 +302,17 @@ p {
   color: var(--muted);
   margin: 0;
   line-height: 1.4;
+}
+
+.meter-source {
+  margin: 0;
+  font-size: 0.65rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  position: absolute;
+  left: 20px;
+  bottom: 14px;
 }
 
 /* Details Section */
@@ -340,28 +340,148 @@ p {
 .tide-card {
   display: grid;
   gap: 14px;
+  grid-column: 1 / -1;
+}
+
+.tide-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.tide-header-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.tide-rating {
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: white;
+  font-weight: 600;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tide-state {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(14, 165, 233, 0.12);
+  color: var(--ink);
+  text-transform: capitalize;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.tide-source {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .tide-chart {
-  background: linear-gradient(120deg, #f2f9fb 0%, #e8f3f7 100%);
+  background: linear-gradient(140deg, #f6fbfd 0%, #e7f1f7 100%);
   border-radius: 16px;
-  padding: 12px;
-  border: 1px solid rgba(14, 116, 144, 0.2);
+  padding: 12px 10px;
+  border: 1px solid rgba(14, 116, 144, 0.15);
+  position: relative;
 }
 
 .tide-chart svg {
   width: 100%;
-  height: 120px;
+  height: auto;
+  aspect-ratio: 720 / 240;
 }
 
-.tide-chart polyline {
+.tide-plot-bg {
+  fill: rgba(255, 255, 255, 0.7);
+}
+
+.tide-axis {
+  stroke: rgba(15, 23, 42, 0.2);
+  stroke-width: 1;
+}
+
+.tide-grid {
+  stroke: rgba(14, 116, 144, 0.15);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+
+.tide-fill {
+  fill: url(#tideFill);
+}
+
+.tide-line {
   fill: none;
   stroke: var(--accent);
-  stroke-width: 2.4;
+  stroke-width: 2.6;
 }
 
-.tide-chart circle {
+.tide-current {
+  stroke: rgba(14, 165, 233, 0.5);
+  stroke-width: 1.5;
+}
+
+.tide-hover {
+  stroke: rgba(14, 165, 233, 0.7);
+  stroke-width: 2;
+}
+
+.tide-dot {
   fill: var(--accent-strong);
+  stroke: white;
+  stroke-width: 1.5;
+}
+
+.tide-hover-dot {
+  fill: #38bdf8;
+  stroke: white;
+  stroke-width: 2;
+}
+
+.tide-axis-label {
+  fill: var(--muted);
+  font-size: 0.7rem;
+  text-anchor: end;
+  dominant-baseline: middle;
+}
+
+.tide-time-label {
+  fill: var(--muted);
+  font-size: 0.7rem;
+}
+
+.tide-time-tick {
+  fill: rgba(15, 23, 42, 0.45);
+  font-size: 0.55rem;
+}
+
+.tide-tooltip {
+  position: absolute;
+  top: 12px;
+  background: rgba(15, 23, 42, 0.92);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  pointer-events: none;
+}
+
+.tide-tooltip strong {
+  font-size: 0.8rem;
 }
 
 .tide-meta {

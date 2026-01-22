@@ -3,7 +3,7 @@ import { ConditionsResponse } from "../types";
 import { ConditionMeter } from "./ConditionMeter";
 import { TideChart } from "./TideChart";
 import { ratingColors } from "../utils/rating";
-import { RatingTier, RatingLabel } from "../ratingRubric";
+import { RatingTier, RatingLabel, ratingTierToLabel } from "../ratingRubric";
 
 interface Metric {
   id: string;
@@ -20,6 +20,7 @@ interface RatingSummary {
   tier: RatingTier;
   label: RatingLabel;
   reason: string;
+  tideTier: RatingTier | null;
   metrics: Metric[];
 }
 
@@ -31,6 +32,16 @@ interface ResultsViewProps {
 }
 
 export function ResultsView({ data, rating, tideSummary, placeName }: ResultsViewProps) {
+  const sourcesByMetric: Record<string, string | undefined> = {
+    waves: data.sources.marine.name,
+    wind: data.sources.weather.name,
+    tide: data.sources.tide?.name ?? data.sources.marine.name,
+    weather: data.sources.weather.name,
+    sunlight: data.sources.weather.name,
+  };
+  const tideRatingLabel = rating.tideTier ? ratingTierToLabel[rating.tideTier] : "Unknown";
+  const tideRatingColor = rating.tideTier ? ratingColors[rating.tideTier] : "var(--muted)";
+
   return (
     <section className="results">
       <div className="summary-card">
@@ -63,6 +74,7 @@ export function ResultsView({ data, rating, tideSummary, placeName }: ResultsVie
                     tier={metric.tier}
                     max={metric.max}
                     explanation={metric.explanation}
+                    source={sourcesByMetric[metric.id]}
                 />
             ))}
         </div>
@@ -81,15 +93,14 @@ export function ResultsView({ data, rating, tideSummary, placeName }: ResultsVie
           */}
           
         {data.tide && tideSummary && (
-          <TideChart tideSummary={tideSummary} tideState={data.conditions.tide.state} />
+          <TideChart
+            tideSummary={tideSummary}
+            tideState={data.conditions.tide.state}
+            tideRatingLabel={tideRatingLabel}
+            tideRatingColor={tideRatingColor}
+            tideSourceName={data.sources.tide?.name}
+          />
         )}
-
-        <div className="detail-card">
-            <h3>Sources</h3>
-            <p className="source">Marine: {data.sources.marine.name}</p>
-            <p className="source">Weather: {data.sources.weather.name}</p>
-            {data.sources.tide && <p className="source">Tide: {data.sources.tide.name}</p>}
-        </div>
       </div>
     </section>
   );

@@ -9,6 +9,7 @@ interface ConditionMeterProps {
   tier: RatingTier | null;
   max: number;
   explanation: string;
+  source?: string;
 }
 
 const tierColors: Record<RatingTier, string> = {
@@ -33,6 +34,7 @@ export function ConditionMeter({
   tier,
   max,
   explanation,
+  source,
 }: ConditionMeterProps) {
   const percentage = value !== null ? Math.min((value / max) * 100, 100) : 0;
   const color = tier ? tierColors[tier] : "var(--muted)";
@@ -57,16 +59,6 @@ export function ConditionMeter({
             )}
         </span>
       </div>
-      
-      <div className="meter-track">
-        <div
-          className="meter-fill"
-          style={{
-            width: `${percentage}%`,
-            backgroundColor: color,
-          }}
-        />
-      </div>
 
       <div className="meter-footer">
         <span className="tier-badge" style={{ backgroundColor: color }}>
@@ -74,6 +66,7 @@ export function ConditionMeter({
         </span>
         <p className="meter-explanation">{explanation}</p>
       </div>
+      {source && <p className="meter-source">Source: {source}</p>}
     </div>
   );
 }

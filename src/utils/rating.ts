@@ -87,6 +87,7 @@ export function buildRatingSummary(conditions: SnorkelConditions): {
   tier: RatingTier;
   label: RatingLabel;
   reason: string;
+  tideTier: RatingTier | null;
   metrics: Array<{
     id: string;
     label: string;
@@ -146,7 +147,7 @@ export function buildRatingSummary(conditions: SnorkelConditions): {
   const metrics = [
     {
       id: "waves",
-      label: "Wave Height",
+      label: "🌊 Wave Height",
       value: conditions.waves.heightMeters,
       unit: "m",
       tier: waveTier,
@@ -155,7 +156,7 @@ export function buildRatingSummary(conditions: SnorkelConditions): {
     },
     {
       id: "wind",
-      label: "Wind Speed",
+      label: "💨 Wind Speed",
       value: conditions.wind.speedMetersPerSecond,
       unit: "m/s",
       tier: windTier,
@@ -163,27 +164,8 @@ export function buildRatingSummary(conditions: SnorkelConditions): {
       explanation: getWindExplanation(conditions.wind.speedMetersPerSecond)
     },
     {
-      id: "tide",
-      label: "Tide",
-      value: conditions.tide.heightMeters,
-      unit: "m",
-      textValue: conditions.tide.state,
-      tier: tideTier,
-      max: 2.0, // Arbitrary visual max
-      explanation: getTideExplanation(conditions.tide.state)
-    },
-    {
-      id: "weather",
-      label: "Precipitation",
-      value: conditions.weather.precipitationMmPerHour,
-      unit: "mm/hr",
-      tier: precipitationTier,
-      max: 5.0,
-      explanation: getPrecipitationExplanation(conditions.weather.precipitationMmPerHour)
-    },
-    {
       id: "sunlight",
-      label: "Sunlight",
+      label: "☀️ Sunlight",
       value: conditions.weather.shortwaveRadiationWm2,
       unit: "W/m2",
       tier: sunlightTier,
@@ -199,6 +181,7 @@ export function buildRatingSummary(conditions: SnorkelConditions): {
     tier: overall,
     label: ratingTierToLabel[overall],
     reason,
+    tideTier,
     metrics,
   };
 }
