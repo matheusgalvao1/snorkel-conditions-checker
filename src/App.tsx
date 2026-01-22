@@ -45,6 +45,7 @@ export default function App() {
   const [options, setOptions] = useState<LocationOption[]>([]);
   const [suggestions, setSuggestions] = useState<SpotSuggestion[]>([]);
   const [state, setState] = useState<RequestState>({ status: "idle" });
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
 
   useEffect(() => {
     if (query.trim().length < 3) {
@@ -70,7 +71,45 @@ export default function App() {
     if (state.status !== "idle") {
       return;
     }
-    void runSearch(defaultLocationQuery);
+
+    if (!navigator.geolocation) {
+      void runSearch(defaultLocationQuery);
+      return;
+    }
+
+    setState({ status: "loading", message: "Getting your location..." });
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        try {
+          const reverseGeoQuery = `${longitude},${latitude}`;
+          const { options: locations } = await geocodeLocation(reverseGeoQuery, 1);
+
+          if (locations.length === 0) {
+            void runSearch(defaultLocationQuery);
+            return;
+          }
+
+          const currentLocation = locations[0];
+          setQuery(currentLocation.placeName);
+          setSelected(currentLocation);
+
+          await fetchAndScore(currentLocation, locations);
+        } catch (error) {
+          void runSearch(defaultLocationQuery);
+        }
+      },
+      () => {
+        void runSearch(defaultLocationQuery);
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 5000,
+        maximumAge: 300000,
+      }
+    );
   }, [state.status]);
 
   const rating = useMemo(() => {
@@ -250,6 +289,76 @@ export default function App() {
     void fetchAndScore(selected, options);
   }
 
+  async function handleUseCurrentLocation() {
+    if (!navigator.geolocation) {
+      setState({
+        status: "error",
+        message: "Geolocation is not supported by your browser.",
+      });
+      return;
+    }
+
+    setIsGettingLocation(true);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        try {
+          setState({ status: "loading", message: "Finding your location..." });
+
+          const reverseGeoQuery = `${longitude},${latitude}`;
+          const { options: locations } = await geocodeLocation(reverseGeoQuery, 1);
+
+          if (locations.length === 0) {
+            setState({
+              status: "error",
+              message: "Could not identify your location. Please try searching manually.",
+            });
+            setIsGettingLocation(false);
+            return;
+          }
+
+          const currentLocation = locations[0];
+          setQuery(currentLocation.placeName);
+          setSelected(currentLocation);
+          setIsGettingLocation(false);
+
+          await fetchAndScore(currentLocation, locations);
+        } catch (error) {
+          setState({
+            status: "error",
+            message: error instanceof Error ? error.message : "Failed to get your location.",
+          });
+          setIsGettingLocation(false);
+        }
+      },
+      (error) => {
+        let message = "Failed to get your location.";
+
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            message = "Location permission denied. Please enable location access.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            message = "Location information unavailable.";
+            break;
+          case error.TIMEOUT:
+            message = "Location request timed out.";
+            break;
+        }
+
+        setState({ status: "error", message });
+        setIsGettingLocation(false);
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 10000,
+        maximumAge: 300000,
+      }
+    );
+  }
+
   return (
     <div className="app">
       <header className="hero">
@@ -273,6 +382,15 @@ export default function App() {
                 placeholder="e.g. Hanauma Bay, HI"
                 list="location-options"
               />
+              <button
+                type="button"
+                className="location-button"
+                onClick={handleUseCurrentLocation}
+                disabled={isGettingLocation || state.status === "loading"}
+                title="Use my current location"
+              >
+                📍
+              </button>
               <button type="submit">Check</button>
             </div>
             <datalist id="location-options">

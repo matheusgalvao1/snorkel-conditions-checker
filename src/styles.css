@@ -132,6 +132,26 @@ p {
   box-shadow: 0 12px 24px rgba(14, 116, 144, 0.2);
 }
 
+.search-row button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.location-button {
+  padding: 12px 14px !important;
+  font-size: 1.2rem;
+  background: white !important;
+  border: 1px solid var(--border) !important;
+  color: var(--accent-strong);
+}
+
+.location-button:hover:not(:disabled) {
+  background: var(--surface) !important;
+  box-shadow: 0 4px 12px rgba(14, 116, 144, 0.1) !important;
+}
+
 .state {
   background: #fff;
   border-radius: 16px;
