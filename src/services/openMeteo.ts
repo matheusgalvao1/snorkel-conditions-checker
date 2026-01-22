@@ -1,6 +1,6 @@
 import type { ConditionsResponse, DataSourceInfo, GeoPoint } from "../types";
 import type { SnorkelConditions, TideCondition, TideState } from "../conditions";
-import { fetchTideConditions } from "./stormglass";
+import { fetchTideConditions } from "./worldTides";
 
 const MARINE_URL =
   (import.meta.env.VITE_OPEN_METEO_MARINE_URL as string | undefined) ??

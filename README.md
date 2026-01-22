@@ -5,14 +5,14 @@ Quickly check snorkeling conditions for a location using live marine, weather, a
 ## Features
 - Location search with autocomplete and nearby spot fallbacks
 - Real-time marine (waves) and weather (wind, precip, cloud) data via Open-Meteo
-- Tide height and state via Stormglass
+- Tide height and state via WorldTides
 - 4-tier rating summary with key metrics
 - Friendly loading, empty, and error states
 
 ## Requirements
 - Node.js 18+
 - Mapbox token for geocoding
-- Stormglass API key for tide data
+- WorldTides API key for tide data
 
 ## Setup
 1. Install dependencies
@@ -26,7 +26,7 @@ Quickly check snorkeling conditions for a location using live marine, weather, a
 3. Add your keys in `.env`
    ```env
    VITE_MAPBOX_TOKEN=your_mapbox_token
-   VITE_STORMGLASS_KEY=your_stormglass_key
+    VITE_TIDE_API_KEY=your_worldtides_key
    ```
 4. Start the dev server
    ```bash
@@ -42,8 +42,8 @@ Quickly check snorkeling conditions for a location using live marine, weather, a
 ## Data Sources
 - Mapbox Geocoding API
 - Open-Meteo Marine + Weather APIs
-- Stormglass Tide API
+- WorldTides API
 
 ## Notes
-- Tide data requires a Stormglass key; without it, tide stays `unknown`.
+- Tide data requires a WorldTides key; without it, tide stays `unknown`.
 - Optional: you can override Open-Meteo endpoints with `VITE_OPEN_METEO_MARINE_URL` and `VITE_OPEN_METEO_WEATHER_URL`.
