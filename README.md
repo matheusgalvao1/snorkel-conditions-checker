@@ -26,12 +26,20 @@ Quickly check snorkeling conditions for a location using live marine, weather, a
 3. Add your keys in `.env`
    ```env
    VITE_MAPBOX_TOKEN=your_mapbox_token
-    VITE_TIDE_API_KEY=your_worldtides_key
+   VITE_TIDE_API_KEY=your_worldtides_key
    ```
 4. Start the dev server
    ```bash
    npm run dev
    ```
+
+## Docker
+1. Ensure your `.env` file is present (see setup above)
+2. Build and run the container
+   ```bash
+   ./start.sh
+   ```
+3. Open `http://localhost:4173`
 
 ## Scripts
 - `npm run dev` - Start the Vite dev server
