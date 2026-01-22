@@ -22,6 +22,7 @@ interface OpenMeteoSeries {
   wind_direction_10m?: number[];
   precipitation?: number[];
   cloud_cover?: number[];
+  shortwave_radiation?: number[];
   tide_height?: number[];
 }
 
@@ -110,6 +111,10 @@ function buildConditions(
     weather.precipitation ?? []
   );
   const cloudCover = pickNearestValue(weather.time ?? [], weather.cloud_cover ?? []);
+  const shortwaveRadiation = pickNearestValue(
+    weather.time ?? [],
+    weather.shortwave_radiation ?? []
+  );
 
   const combinedWaveHeight =
     waveHeight !== null
@@ -137,6 +142,7 @@ function buildConditions(
       temperatureC: null,
       precipitationMmPerHour: precipitation,
       cloudCoverPercent: cloudCover,
+      shortwaveRadiationWm2: shortwaveRadiation,
     },
     visibility: null,
   };
@@ -208,7 +214,7 @@ export async function fetchConditions(
   const weatherParams = {
     ...baseParams,
     hourly:
-      "wind_speed_10m,wind_gusts_10m,wind_direction_10m,precipitation,cloud_cover",
+      "wind_speed_10m,wind_gusts_10m,wind_direction_10m,precipitation,cloud_cover,shortwave_radiation",
   };
 
   const marineWaves = await fetchOpenMeteo(MARINE_URL, marineWaveParams).catch(

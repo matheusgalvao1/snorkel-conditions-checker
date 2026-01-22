@@ -21,6 +21,7 @@ export interface WeatherCondition {
   temperatureC: number | null;
   precipitationMmPerHour: number | null;
   cloudCoverPercent: number | null;
+  shortwaveRadiationWm2: number | null;
 }
 
 export interface VisibilityCondition {

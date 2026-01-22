@@ -45,6 +45,7 @@ export interface RatingRubric {
   weather: {
     precipitationMmPerHour: NumericThresholdRule;
     cloudCoverPercent: NumericThresholdRule;
+    shortwaveRadiationWm2: NumericThresholdRule;
   };
   visibility: {
     rangeMeters: NumericThresholdRule;
@@ -97,6 +98,12 @@ export const ratingRubric: RatingRubric = {
       excellentMax: 20,
       goodMax: 50,
       okMax: 80,
+    },
+    shortwaveRadiationWm2: {
+      direction: "higher-is-better",
+      excellentMin: 600,
+      goodMin: 400,
+      okMin: 200,
     },
   },
   visibility: {

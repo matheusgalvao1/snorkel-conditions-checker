@@ -118,6 +118,10 @@ export function buildRatingSummary(conditions: SnorkelConditions): {
     conditions.weather.cloudCoverPercent,
     ratingRubric.weather.cloudCoverPercent
   );
+  const sunlightTier = scoreNumeric(
+    conditions.weather.shortwaveRadiationWm2,
+    ratingRubric.weather.shortwaveRadiationWm2
+  );
   const tideTier = scoreCategorical(
     conditions.tide.state,
     ratingRubric.tide.state.tiers,
@@ -134,6 +138,7 @@ export function buildRatingSummary(conditions: SnorkelConditions): {
     { tier: gustTier, weight: 0.1 },
     { tier: precipitationTier, weight: 0.15 },
     { tier: cloudTier, weight: 0.05 },
+    { tier: sunlightTier, weight: 0.1 },
     { tier: tideTier, weight: 0.1 },
     { tier: visibilityTier, weight: 0.1 },
   ]);
@@ -176,10 +181,19 @@ export function buildRatingSummary(conditions: SnorkelConditions): {
       max: 5.0,
       explanation: getPrecipitationExplanation(conditions.weather.precipitationMmPerHour)
     },
+    {
+      id: "sunlight",
+      label: "Sunlight",
+      value: conditions.weather.shortwaveRadiationWm2,
+      unit: "W/m2",
+      tier: sunlightTier,
+      max: 1000,
+      explanation: getSunlightExplanation(conditions.weather.shortwaveRadiationWm2)
+    },
   ];
 
   const reason = `Based on waves ${waveTier ?? "unknown"}, wind ${windTier ?? "unknown"}, ` +
-    `tide ${tideTier ?? "unknown"}, and weather ${precipitationTier ?? "unknown"}.`;
+    `tide ${tideTier ?? "unknown"}, and sunlight ${sunlightTier ?? "unknown"}.`;
 
   return {
     tier: overall,
@@ -218,6 +232,14 @@ function getPrecipitationExplanation(val: number | null) {
   if (val < 0.1) return "Dry. Good visibility.";
   if (val < 2.0) return "Light rain. Visibility might drop.";
   return "Heavy rain. Runoff may cloud water.";
+}
+
+function getSunlightExplanation(val: number | null) {
+  if (val === null) return "Unknown light conditions";
+  if (val >= 600) return "Bright sun. Excellent water visibility.";
+  if (val >= 400) return "Good light. Visibility should be solid.";
+  if (val >= 200) return "Dimmer light. Visibility may soften.";
+  return "Low light. Water may look murky.";
 }
 
 export const ratingColors: Record<RatingTier, string> = {
