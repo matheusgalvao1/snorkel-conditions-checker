@@ -11,8 +11,8 @@ Quickly check snorkeling conditions for a location using live marine, weather, a
 
 ## Requirements
 - Node.js 18+
-- Mapbox token for geocoding
-- WorldTides API key for tide data
+- Mapbox token for location search (geocoding)
+- WorldTides API key for tide heights + state
 
 ## Setup
 1. Install dependencies
@@ -48,9 +48,10 @@ Quickly check snorkeling conditions for a location using live marine, weather, a
 - `npm run typecheck` - Run TypeScript type checks
 
 ## Data Sources
-- Mapbox Geocoding API
-- Open-Meteo Marine + Weather APIs
-- WorldTides API
+- Mapbox Geocoding API: search text -> coordinates (`VITE_MAPBOX_TOKEN`)
+- Open-Meteo Marine API: wave height, period, direction, swell (no API key)
+- Open-Meteo Weather API: wind, gusts, precipitation, cloud cover (no API key)
+- WorldTides API: tide height, tide state, and chart points (`VITE_TIDE_API_KEY`)
 
 ## Notes
 - Tide data requires a WorldTides key; without it, tide stays `unknown`.
