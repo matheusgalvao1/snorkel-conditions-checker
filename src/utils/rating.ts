@@ -144,6 +144,13 @@ export function buildRatingSummary(conditions: SnorkelConditions): {
     { tier: visibilityTier, weight: 0.1 },
   ]);
 
+  const windDirectionLabel = formatWindDirection(conditions.wind.directionDegrees);
+  const windSpeedKmh =
+    conditions.wind.speedMetersPerSecond !== null
+      ? conditions.wind.speedMetersPerSecond * 3.6
+      : null;
+  const windUnit = windDirectionLabel ? `km/h ${windDirectionLabel}` : "km/h";
+
   const metrics = [
     {
       id: "waves",
@@ -157,10 +164,10 @@ export function buildRatingSummary(conditions: SnorkelConditions): {
     {
       id: "wind",
       label: "💨 Wind Speed",
-      value: conditions.wind.speedMetersPerSecond,
-      unit: "m/s",
+      value: windSpeedKmh,
+      unit: windUnit,
       tier: windTier,
-      max: 10.0,
+      max: 36.0,
       explanation: getWindExplanation(conditions.wind.speedMetersPerSecond)
     },
     {
@@ -223,6 +230,15 @@ function getSunlightExplanation(val: number | null) {
   if (val >= 400) return "Good light. Visibility should be solid.";
   if (val >= 200) return "Dimmer light. Visibility may soften.";
   return "Low light. Water may look murky.";
+}
+
+function formatWindDirection(direction: number | null): string | null {
+  if (direction === null || !Number.isFinite(direction)) {
+    return null;
+  }
+  const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+  const index = Math.round(direction / 45) % directions.length;
+  return directions[index];
 }
 
 export const ratingColors: Record<RatingTier, string> = {
