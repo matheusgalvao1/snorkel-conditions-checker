@@ -87,7 +87,16 @@ export function buildRatingSummary(conditions: SnorkelConditions): {
   tier: RatingTier;
   label: RatingLabel;
   reason: string;
-  metrics: Array<{ label: string; value: string }>;
+  metrics: Array<{
+    id: string;
+    label: string;
+    value: number | null;
+    unit: string;
+    textValue?: string;
+    tier: RatingTier | null;
+    max: number;
+    explanation: string;
+  }>;
 } {
   const waveTier = scoreNumeric(
     conditions.waves.heightMeters,
@@ -131,29 +140,41 @@ export function buildRatingSummary(conditions: SnorkelConditions): {
 
   const metrics = [
     {
-      label: "Wave height",
-      value:
-        conditions.waves.heightMeters !== null
-          ? `${conditions.waves.heightMeters.toFixed(1)} m`
-          : "Unknown",
+      id: "waves",
+      label: "Wave Height",
+      value: conditions.waves.heightMeters,
+      unit: "m",
+      tier: waveTier,
+      max: 3.0, // Visual max for bar
+      explanation: getWaveExplanation(conditions.waves.heightMeters)
     },
     {
-      label: "Wind",
-      value:
-        conditions.wind.speedMetersPerSecond !== null
-          ? `${conditions.wind.speedMetersPerSecond.toFixed(1)} m/s`
-          : "Unknown",
+      id: "wind",
+      label: "Wind Speed",
+      value: conditions.wind.speedMetersPerSecond,
+      unit: "m/s",
+      tier: windTier,
+      max: 10.0,
+      explanation: getWindExplanation(conditions.wind.speedMetersPerSecond)
     },
     {
+      id: "tide",
       label: "Tide",
-      value: conditions.tide.state === "unknown" ? "Unknown" : conditions.tide.state,
+      value: conditions.tide.heightMeters,
+      unit: "m",
+      textValue: conditions.tide.state,
+      tier: tideTier,
+      max: 2.0, // Arbitrary visual max
+      explanation: getTideExplanation(conditions.tide.state)
     },
     {
+      id: "weather",
       label: "Precipitation",
-      value:
-        conditions.weather.precipitationMmPerHour !== null
-          ? `${conditions.weather.precipitationMmPerHour.toFixed(1)} mm/hr`
-          : "Unknown",
+      value: conditions.weather.precipitationMmPerHour,
+      unit: "mm/hr",
+      tier: precipitationTier,
+      max: 5.0,
+      explanation: getPrecipitationExplanation(conditions.weather.precipitationMmPerHour)
     },
   ];
 
@@ -166,6 +187,37 @@ export function buildRatingSummary(conditions: SnorkelConditions): {
     reason,
     metrics,
   };
+}
+
+function getWaveExplanation(val: number | null) {
+  if (val === null) return "Unknown conditions";
+  if (val < 0.5) return "Flat and calm. Perfect for beginners.";
+  if (val < 1.0) return "Small waves. Comfortable for most.";
+  if (val < 1.5) return "Choppy waters. Exercise caution.";
+  return "Rough seas. Not recommended.";
+}
+
+function getWindExplanation(val: number | null) {
+  if (val === null) return "Unknown conditions";
+  if (val < 3) return "Light breeze. Smooth surface.";
+  if (val < 5) return "Moderate breeze. Some ripples.";
+  if (val < 7.5) return "Windy. Expect surface chop.";
+  return "Strong winds. Rough surface conditions.";
+}
+
+function getTideExplanation(state: string) {
+  if (state === "high") return "Best visibility and easiest entry.";
+  if (state === "rising") return "Good incoming clear water.";
+  if (state === "falling") return "Currents may pull away from shore.";
+  if (state === "low") return "Shallow. Watch out for coral/rocks.";
+  return "Check local tide tables.";
+}
+
+function getPrecipitationExplanation(val: number | null) {
+  if (val === null) return "Unknown conditions";
+  if (val < 0.1) return "Dry. Good visibility.";
+  if (val < 2.0) return "Light rain. Visibility might drop.";
+  return "Heavy rain. Runoff may cloud water.";
 }
 
 export const ratingColors: Record<RatingTier, string> = {

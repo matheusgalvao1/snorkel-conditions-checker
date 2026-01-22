@@ -4,7 +4,9 @@ import type { ConditionsResponse, LocationOption, SpotSuggestion } from "./types
 import type { SnorkelConditions } from "./conditions";
 import { geocodeLocation, distanceInKm } from "./services/geocoding";
 import { fetchConditions } from "./services/openMeteo";
-import { buildRatingSummary, ratingColors } from "./utils/rating";
+import { buildRatingSummary } from "./utils/rating";
+import { SearchSection } from "./components/SearchSection";
+import { ResultsView } from "./components/ResultsView";
 
 const emptySuggestions: SpotSuggestion[] = [];
 
@@ -26,16 +28,6 @@ function hasConditionsData(conditions: SnorkelConditions): boolean {
       conditions.weather.cloudCoverPercent ??
       conditions.tide.heightMeters
   );
-}
-
-function formatWindDirection(degrees: number | null): string {
-  if (degrees === null || !Number.isFinite(degrees)) {
-    return "-";
-  }
-  const normalized = ((degrees % 360) + 360) % 360;
-  const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
-  const index = Math.round(normalized / 45) % directions.length;
-  return `${normalized.toFixed(0)}° ${directions[index]}`;
 }
 
 export default function App() {
@@ -316,192 +308,27 @@ export default function App() {
 
   return (
     <div className="app">
-      <header className="hero">
-        <div>
-          <p className="eyebrow">Snorkel Conditions Checker</p>
-          <h1>Find your calm patch of water.</h1>
-          <p className="lede">
-            Search a shoreline and instantly see real-time wave, tide, wind, and
-            weather factors with a clear rating.
-          </p>
-        </div>
-        <div className="hero-card">
-          <form className="search" onSubmit={handleSearch}>
-            <label htmlFor="location">Location</label>
-            <div className="search-row">
-              <input
-                id="location"
-                type="text"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="e.g. Hanauma Bay, HI"
-                list="location-options"
-              />
-              <button
-                type="button"
-                className="location-button"
-                onClick={handleUseCurrentLocation}
-                disabled={isGettingLocation || state.status === "loading"}
-                title="Use my current location"
-              >
-                📍
-              </button>
-              <button type="submit">Check</button>
-            </div>
-            <datalist id="location-options">
-              {options.map((option) => (
-                <option key={option.id} value={option.placeName} />
-              ))}
-            </datalist>
-          </form>
-          {state.status === "loading" && (
-            <div className="state">{state.message}</div>
-          )}
-          {state.status === "error" && (
-            <div className="state error">
-              <p>{state.message}</p>
-              <button type="button" onClick={handleRetry}>
-                Retry
-              </button>
-            </div>
-          )}
-          {state.status === "empty" && (
-            <div className="state">
-              <p>{state.message}</p>
-              {suggestions.length > 0 && (
-                <div className="suggestions">
-                  {suggestions.map((option) => (
-                    <button
-                      key={option.id}
-                      type="button"
-                      onClick={() => handleSuggestionClick(option)}
-                    >
-                      {option.name} · {option.distanceKm.toFixed(1)} km
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </header>
+      <SearchSection
+        query={query}
+        setQuery={setQuery}
+        options={options}
+        isGettingLocation={isGettingLocation}
+        handleSearch={handleSearch}
+        handleUseCurrentLocation={handleUseCurrentLocation}
+        status={state.status}
+        message={state.status === "loading" || state.status === "error" || state.status === "empty" ? state.message : undefined}
+        handleRetry={handleRetry}
+        suggestions={suggestions}
+        handleSuggestionClick={handleSuggestionClick}
+      />
 
       {state.status === "success" && rating && (
-        <section className="results">
-          <div className="summary-card">
-            <div className="summary-header">
-              <div>
-                <p className="eyebrow">Current summary</p>
-                <h2>{selected?.placeName ?? "Selected spot"}</h2>
-                <p className="timestamp">
-                  Updated {new Date(state.data.sources.marine.fetchedAt).toLocaleTimeString()}
-                </p>
-              </div>
-              <div
-                className="rating-pill"
-                style={{ backgroundColor: ratingColors[rating.tier] }}
-              >
-                {rating.label}
-              </div>
-            </div>
-            <p className="rating-reason">{rating.reason}</p>
-            <div className="metrics">
-              {rating.metrics.map((metric) => (
-                <div key={metric.label} className="metric">
-                  <span>{metric.label}</span>
-                  <strong>{metric.value}</strong>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="details-grid">
-            <div className="detail-card">
-              <h3>Marine</h3>
-              <ul>
-                <li>Wave height: {state.data.conditions.waves.heightMeters ?? "-"} m</li>
-                <li>Wave period: {state.data.conditions.waves.periodSeconds ?? "-"} s</li>
-                <li>Wind gusts: {state.data.conditions.wind.gustMetersPerSecond ?? "-"} m/s</li>
-                <li>Tide height: {state.data.conditions.tide.heightMeters ?? "-"} m</li>
-              </ul>
-              <p className="source">
-                Source: {state.data.sources.marine.name} · {state.data.sources.marine.fetchedAt}
-              </p>
-            </div>
-            {state.data.tide && tideSummary && (
-              <div className="detail-card tide-card">
-                <h3>Tide</h3>
-                <div className="tide-chart">
-                  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
-                    <polyline points={tideSummary.path} />
-                    <circle
-                      cx={
-                        tideSummary.points.length === 1
-                          ? 50
-                          : (tideSummary.currentIndex / (tideSummary.points.length - 1)) * 100
-                      }
-                      cy={
-                        100 -
-                        ((tideSummary.current.heightMeters - tideSummary.minHeight) /
-                          (tideSummary.maxHeight - tideSummary.minHeight || 1)) *
-                          100
-                      }
-                      r="2"
-                    />
-                  </svg>
-                </div>
-                <div className="tide-meta">
-                  <div>
-                    <span>Now</span>
-                    <strong>{tideSummary.current.heightMeters.toFixed(2)} m</strong>
-                  </div>
-                  <div>
-                    <span>State</span>
-                    <strong>{state.data.conditions.tide.state}</strong>
-                  </div>
-                </div>
-                <div className="tide-times">
-                  {tideSummary.timeWindow.map((point) => (
-                    <div key={point.time}>
-                      <span>
-                        {new Date(point.time).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
-                      <strong>{point.heightMeters.toFixed(2)} m</strong>
-                    </div>
-                  ))}
-                </div>
-                {state.data.tide.stationName && (
-                  <p className="source">Station: {state.data.tide.stationName}</p>
-                )}
-                {state.data.tide.datum && (
-                  <p className="source">Datum: {state.data.tide.datum}</p>
-                )}
-                {state.data.sources.tide && (
-                  <p className="source">
-                    Source: {state.data.sources.tide.name} · {state.data.sources.tide.fetchedAt}
-                  </p>
-                )}
-              </div>
-            )}
-            <div className="detail-card">
-              <h3>Weather</h3>
-              <ul>
-                <li>Wind speed: {state.data.conditions.wind.speedMetersPerSecond ?? "-"} m/s</li>
-                <li>
-                  Wind direction: {formatWindDirection(state.data.conditions.wind.directionDegrees)}
-                </li>
-                <li>Precipitation: {state.data.conditions.weather.precipitationMmPerHour ?? "-"} mm/hr</li>
-                <li>Cloud cover: {state.data.conditions.weather.cloudCoverPercent ?? "-"}%</li>
-              </ul>
-              <p className="source">
-                Source: {state.data.sources.weather.name} · {state.data.sources.weather.fetchedAt}
-              </p>
-            </div>
-          </div>
-        </section>
+        <ResultsView
+          data={state.data}
+          rating={rating}
+          tideSummary={tideSummary}
+          placeName={selected?.placeName ?? "Selected spot"}
+        />
       )}
     </div>
   );
