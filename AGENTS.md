@@ -1,41 +1,39 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-This is a Vite + React + TypeScript single-page app. Source lives in `src/` with
-entry points at `src/main.tsx` (React mount) and `src/App.tsx` (UI + data flow).
-Domain logic is split into small modules:
-- `src/services/` for external API calls (Mapbox geocoding, Open-Meteo, Stormglass).
-- `src/utils/` for pure helpers (rating calculations).
-- `src/types.ts` and `src/conditions.ts` for shared types and condition models.
-- `src/styles.css` for global styling. Build config is in `vite.config.ts`.
+- `src/` contains the React + TypeScript app.
+  - `src/components/` holds UI components (PascalCase filenames like `SearchSection.tsx`).
+  - `src/services/` contains API clients for geocoding, weather, and tides.
+  - `src/utils/`, `src/conditions.ts`, and `src/ratingRubric.ts` hold shared logic and rules.
+- `src/styles.css` defines the global styles.
+- `index.html`, `vite.config.ts`, and `tsconfig.json` configure Vite and TypeScript.
+- `start.sh` and `Dockerfile` support the Docker workflow.
 
 ## Build, Test, and Development Commands
-- `npm install` to install dependencies.
-- `npm run dev` to start the Vite dev server.
-- `npm run build` to create a production build.
-- `npm run preview` to serve the production build locally.
-- `npm run typecheck` to run TypeScript checks.
-- `npm test` currently prints a placeholder message (no tests configured).
+- `npm install` installs dependencies.
+- `npm run dev` starts the Vite dev server.
+- `npm run build` builds the production bundle.
+- `npm run preview` serves the production build locally.
+- `npm run typecheck` runs TypeScript checks without emitting.
+- `npm test` runs Jest (no tests are currently committed).
+- `./start.sh` builds and runs the Docker image (expects a `.env` file).
 
 ## Coding Style & Naming Conventions
-Follow the existing formatting in `src/` (2-space indentation and explicit
-imports). Use `PascalCase` for React components (`App.tsx`), `camelCase` for
-functions and variables, and `VITE_`-prefixed `UPPER_SNAKE_CASE` for env vars.
-No formatter or linter is configured, so keep changes minimal and consistent.
+- Use 2-space indentation, double quotes, and semicolons to match existing files.
+- React components are PascalCase; variables and functions are camelCase.
+- Keep files near their domain (services in `src/services`, UI in `src/components`).
 
 ## Testing Guidelines
-There is no automated test framework yet. Use `npm run typecheck` and manual
-verification via `npm run dev`. If you add tests later, document the framework,
-conventions, and how to run them here.
+- Tests run via Jest (`npm test`) with `ts-jest`.
+- Prefer `*.test.ts` or `*.test.tsx` naming and colocate with the module or in `src/__tests__/`.
+- If adding new logic, include unit tests for rating and data-parsing utilities.
 
 ## Commit & Pull Request Guidelines
-The git history is empty, so no commit convention exists yet. Use short,
-imperative messages (e.g., "Add tide summary chart") and keep commits focused.
-For PRs, include a clear description, testing steps, and screenshots for UI
-changes. Link related issues if applicable.
+- Commit messages are short, imperative, and descriptive (e.g., "Add Dockerfile and start script").
+- PRs should include a concise summary, testing notes, and screenshots for UI changes.
+- Link related issues and call out any changes to required environment variables.
 
 ## Configuration & Secrets
-Create `.env` from `.env.example` and set `VITE_MAPBOX_TOKEN` and
-`VITE_STORMGLASS_KEY`. Optional overrides include
-`VITE_OPEN_METEO_MARINE_URL` and `VITE_OPEN_METEO_WEATHER_URL`. Do not commit
-real credentials.
+- Copy `.env.example` to `.env` and set `VITE_MAPBOX_TOKEN` and `VITE_TIDE_API_KEY`.
+- Optional overrides: `VITE_OPEN_METEO_MARINE_URL` and `VITE_OPEN_METEO_WEATHER_URL`.
+- Never commit real API keys.
